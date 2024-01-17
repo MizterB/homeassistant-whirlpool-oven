@@ -1,0 +1,12 @@
+{
+  "domain": "whirlpool_oven",
+  "name": "Whirlpool Oven",
+  "codeowners": ["@MizterB"],
+  "config_flow": true,
+  "documentation": "https://github.com/MizterB/homeassistant-whirlpool-oven",
+  "integration_type": "hub",
+  "iot_class": "cloud_push",
+  "loggers": ["whirlpool_oven"],
+  "requirements": ["whirlpool-sixth-sense==0.18.5"],
+  "version": "0.1"
+}
