@@ -16,8 +16,14 @@ from .const import (
     BRAND_WHIRLPOOL,
     DOMAIN,
     LOGGER,
+    OVEN_CAVITY_NAME_LOWER,
+    OVEN_CAVITY_NAME_LOWER_H,
+    OVEN_CAVITY_NAME_SINGLE,
+    OVEN_CAVITY_NAME_UPPER,
+    OVEN_CAVITY_NAME_UPPER_H,
     OVEN_CAVITY_STATES,
     OVEN_COOK_MODES,
+    OVEN_MODELS_HORIZONTAL,
 )
 
 
@@ -88,82 +94,76 @@ class WhirlpoolOvenDevice(DataUpdateCoordinator):
         """Handle oven data update callbacks."""
         LOGGER.debug(f"Oven data for {self.appliance_data.name} has been updated")
 
+    def register_callback(self, fn: callable):
+        """Register a callback for oven updates."""
+        self.oven.register_attr_callback(fn)
+
+    def unregister_callback(self, fn: callable):
+        """Unregister a callback for oven updates."""
+        self.oven.unregister_attr_callback(fn)
+
     @property
-    def cavity_name(self, cavity: Cavity) -> bool:
-        """Return the name of the oven cavity."""
-        upper_exists = self.oven.get_oven_cavity_exists(Cavity.Upper)
-        lower_exists = self.oven.get_oven_cavity_exists(Cavity.Lower)
-        return self.oven.get_online() | False
+    def has_multiple_cavities(self) -> bool:
+        """True if the oven has multiple cavities."""
+        if self.oven.get_oven_cavity_exists(
+            Cavity.Upper
+        ) and self.oven.get_oven_cavity_exists(Cavity.Lower):
+            return True
+        return False
+
+    @property
+    def cavities_are_horizontal(self) -> bool:
+        """True if the oven has multiple cavities in a horizontal layout."""
+        for horizontal_model in OVEN_MODELS_HORIZONTAL:
+            if horizontal_model in self.appliance_data.model_number:
+                return True
+        return False
+
+    def get_cavity_name(self, cavity: Cavity) -> str:
+        """Return the name of a cavity, based on number of cavities and orientation."""
+        name = OVEN_CAVITY_NAME_SINGLE
+        if self.has_multiple_cavities:
+            if cavity == Cavity.Lower:
+                if self.cavities_are_horizontal:
+                    name = OVEN_CAVITY_NAME_LOWER_H
+                else:
+                    name = OVEN_CAVITY_NAME_LOWER
+            elif cavity == Cavity.Upper:
+                if self.cavities_are_horizontal:
+                    name = OVEN_CAVITY_NAME_UPPER_H
+                else:
+                    name = OVEN_CAVITY_NAME_UPPER
+        return name
 
     @property
     def is_online(self) -> bool:
         """Return the online status of the oven."""
         return self.oven.get_online() | False
 
-    @property
-    def upper_state(self) -> str:
-        """Return the state of the upper/right oven."""
-        state = self.oven.get_cavity_state(Cavity.Upper)
+    def cavity_state(self, cavity: Cavity) -> str:
+        """Return the state of an oven cavity."""
+        state = self.oven.get_cavity_state(cavity)
         return OVEN_CAVITY_STATES.get(state)
 
-    @property
-    def upper_mode(self) -> str:
-        """Return the mode of the upper/right oven."""
-        mode = self.oven.get_cook_mode(Cavity.Upper)
+    def cook_mode(self, cavity: Cavity) -> str:
+        """Return the mode of an oven cavity."""
+        mode = self.oven.get_cook_mode(cavity)
         return OVEN_COOK_MODES.get(mode)
 
-    @property
-    def upper_current_temperature(self) -> float:
-        """Return the current temperature of the upper/right oven."""
-        temp = self.oven.get_temp(Cavity.Upper)
+    def current_temperature(self, cavity: Cavity) -> float:
+        """Return the current temperature of an oven cavity."""
+        temp = self.oven.get_temp(cavity)
         return temp if temp != 0 else None
 
-    @property
-    def upper_target_temperature(self) -> float:
-        """Return the target temperature of the upper/right oven."""
-        temp = self.oven.get_target_temp(Cavity.Upper)
+    def target_temperature(self, cavity: Cavity) -> float:
+        """Return the target temperature of an oven cavity."""
+        temp = self.oven.get_target_temp(cavity)
         return temp if temp != 0 else None
 
-    @property
-    def upper_door(self) -> str:
-        """Return the door state of the upper/right oven."""
-        return str(self.oven.get_door_opened(Cavity.Upper))
+    def is_door_open(self, cavity: Cavity) -> bool:
+        """Return True if an oven cavity door is open."""
+        return self.oven.get_door_opened(cavity)
 
-    @property
-    def upper_light(self) -> str:
-        """Return the light state of the upper/right oven."""
-        return str(self.oven.get_light(Cavity.Upper))
-
-    @property
-    def lower_state(self) -> str:
-        """Return the state of the lower/left oven."""
-        state = self.oven.get_cavity_state(Cavity.Lower)
-        return OVEN_CAVITY_STATES.get(state)
-
-    @property
-    def lower_mode(self) -> str:
-        """Return the mode of the lower/left oven."""
-        mode = self.oven.get_cook_mode(Cavity.Lower)
-        return OVEN_COOK_MODES.get(mode)
-
-    @property
-    def lower_current_temperature(self) -> float:
-        """Return the current temperature of the lower/left oven."""
-        temp = self.oven.get_temp(Cavity.Lower)
-        return temp if temp != 0 else None
-
-    @property
-    def lower_target_temperature(self) -> float:
-        """Return the target temperature of the lower/left oven."""
-        temp = self.oven.get_target_temp(Cavity.Lower)
-        return temp if temp != 0 else None
-
-    @property
-    def lower_door(self) -> str:
-        """Return the door state of the lower/left oven."""
-        return str(self.oven.get_door_opened(Cavity.Lower))
-
-    @property
-    def lower_light(self) -> str:
-        """Return the light state of the lower/left oven."""
-        return str(self.oven.get_light(Cavity.Lower))
+    def is_light_on(self, cavity: Cavity) -> bool:
+        """Return True if an oven cavity light is on."""
+        return self.oven.get_light(Cavity.Upper)
