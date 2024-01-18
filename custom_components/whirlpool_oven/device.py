@@ -166,4 +166,12 @@ class WhirlpoolOvenDevice(DataUpdateCoordinator):
 
     def is_light_on(self, cavity: Cavity) -> bool:
         """Return True if an oven cavity light is on."""
-        return self.oven.get_light(Cavity.Upper)
+        return self.oven.get_light(cavity)
+
+    async def turn_on_light(self, cavity: Cavity) -> None:
+        """Turn on an oven cavity light."""
+        await self.oven.set_light(True, cavity)
+
+    async def turn_off_light(self, cavity: Cavity) -> None:
+        """Turn off an oven cavity light."""
+        await self.oven.set_light(False, cavity)

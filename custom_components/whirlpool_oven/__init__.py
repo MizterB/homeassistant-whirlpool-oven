@@ -15,8 +15,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from .const import CONF_OVEN, CONF_REGION_MAP, DOMAIN
 from .device import WhirlpoolOvenDevice, WhirpoolApplianceData
 
-# PLATFORMS = [Platform.BINARY_SENSOR, Platform.LIGHT, Platform.SENSOR]
-PLATFORMS = [Platform.SENSOR]
+PLATFORMS = [Platform.SENSOR, Platform.BINARY_SENSOR, Platform.LIGHT]
 
 
 def get_backend_selector_brand(region: Region) -> Brand:

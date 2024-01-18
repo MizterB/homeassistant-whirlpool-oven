@@ -24,7 +24,7 @@ async def async_setup_entry(
     config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up the Whirlpool Appliances sensors."""
+    """Set up the Whirlpool Appliances sensors from config entry."""
 
     for oven_device in hass.data[DOMAIN][config_entry.entry_id][CONF_OVEN].values():
         oven_device: WhirlpoolOvenDevice

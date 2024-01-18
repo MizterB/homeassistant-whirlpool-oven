@@ -18,10 +18,7 @@ from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from . import get_backend_selector_brand
-from .const import CONF_REGION_MAP, DOMAIN
-
-_LOGGER = logging.getLogger(__name__)
-
+from .const import CONF_REGION_MAP, DOMAIN, LOGGER
 
 STEP_USER_DATA_SCHEMA = vol.Schema(
     {
@@ -56,7 +53,11 @@ async def validate_input(
 
     appliances_manager = AppliancesManager(backend_selector, auth, session)
     await appliances_manager.fetch_appliances()
-    if appliances_manager.aircons is None and appliances_manager.washer_dryers is None:
+    if (
+        appliances_manager.aircons is None
+        and appliances_manager.washer_dryers is None
+        and appliances_manager.ovens is None
+    ):
         raise NoAppliances
 
     return {"title": data[CONF_USERNAME]}
@@ -129,7 +130,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         except NoAppliances:
             errors["base"] = "no_appliances"
         except Exception:  # pylint: disable=broad-except
-            _LOGGER.exception("Unexpected exception")
+            LOGGER.exception("Unexpected exception")
             errors["base"] = "unknown"
         else:
             await self.async_set_unique_id(
