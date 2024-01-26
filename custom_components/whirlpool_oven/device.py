@@ -1,12 +1,15 @@
 """Device data for the Whirpool Appliances integration."""
 from __future__ import annotations
 
+from datetime import datetime, timedelta
+
 from aiohttp import ClientSession
 from whirlpool.auth import Auth
 from whirlpool.backendselector import BackendSelector
 from whirlpool.oven import Cavity, Oven
 
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.event import async_track_time_interval
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .const import (
@@ -78,7 +81,11 @@ class WhirlpoolOvenDevice(DataUpdateCoordinator):
             session,
         )
 
+        # Register for the updates provided by the Whirlpool API
         self.oven.register_attr_callback(self.on_update)
+
+        # Create a periodic keep-alive call to prevent the API connection from going stale
+        async_track_time_interval(self.hass, self.keep_alive, timedelta(minutes=5))
 
         super().__init__(
             hass,
@@ -93,6 +100,11 @@ class WhirlpoolOvenDevice(DataUpdateCoordinator):
     def on_update(self) -> None:
         """Handle oven data update callbacks."""
         LOGGER.debug(f"Oven data for {self.appliance_data.name} has been updated")
+
+    async def keep_alive(self, trigger: datetime) -> None:
+        """Listen for oven events."""
+        LOGGER.debug(f"Keeping the API connection alive")
+        await self.oven.fetch_data()
 
     def register_callback(self, fn: callable):
         """Register a callback for oven updates."""
