@@ -3,16 +3,24 @@
 import logging
 from typing import Final
 
-from whirlpool.backendselector import Region
+from whirlpool.backendselector import Brand, Region
 from whirlpool.oven import CavityState, CookMode
 
 DOMAIN: Final = "whirlpool_oven"
 
 LOGGER = logging.getLogger(__package__)
 
+CONF_BRAND: Final = "brand"
 CONF_OVEN: Final = "oven"
 CONF_LAUNDRY: Final = "laundry"
 CONF_AIRCON: Final = "aircon"
+
+
+CONF_BRANDS_MAP: Final = {
+    "Whirlpool": Brand.Whirlpool,
+    "Maytag": Brand.Maytag,
+    "KitchenAid": Brand.KitchenAid,
+}
 CONF_REGION_MAP: Final = {
     "EU": Region.EU,
     "US": Region.US,

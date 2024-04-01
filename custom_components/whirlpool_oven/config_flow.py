@@ -1,9 +1,9 @@
 """Config flow for Whirlpool Appliances integration."""
+
 from __future__ import annotations
 
 import asyncio
 from collections.abc import Mapping
-import logging
 from typing import Any
 
 from aiohttp import ClientError
@@ -17,18 +17,23 @@ from homeassistant.const import CONF_PASSWORD, CONF_REGION, CONF_USERNAME
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from . import get_backend_selector_brand
-from .const import CONF_REGION_MAP, DOMAIN, LOGGER
+from .const import CONF_BRAND, CONF_BRANDS_MAP, CONF_REGION_MAP, DOMAIN, LOGGER
 
 STEP_USER_DATA_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_USERNAME): str,
         vol.Required(CONF_PASSWORD): str,
         vol.Required(CONF_REGION): vol.In(list(CONF_REGION_MAP)),
+        vol.Required(CONF_BRAND): vol.In(list(CONF_BRANDS_MAP)),
     }
 )
 
-REAUTH_SCHEMA = vol.Schema({vol.Required(CONF_PASSWORD): str})
+REAUTH_SCHEMA = vol.Schema(
+    {
+        vol.Required(CONF_PASSWORD): str,
+        vol.Required(CONF_BRAND): vol.In(list(CONF_BRANDS_MAP)),
+    }
+)
 
 
 async def validate_input(
@@ -40,12 +45,12 @@ async def validate_input(
     """
     session = async_get_clientsession(hass)
     region = CONF_REGION_MAP[data[CONF_REGION]]
-    brand = get_backend_selector_brand(region)
+    brand = CONF_BRANDS_MAP[data[CONF_BRAND]]
     backend_selector = BackendSelector(brand, region)
     auth = Auth(backend_selector, data[CONF_USERNAME], data[CONF_PASSWORD], session)
     try:
         await auth.do_auth()
-    except (asyncio.TimeoutError, ClientError) as exc:
+    except (TimeoutError, ClientError) as exc:
         raise CannotConnect from exc
 
     if not auth.is_access_token_valid():
@@ -84,25 +89,21 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input:
             assert self.entry is not None
             password = user_input[CONF_PASSWORD]
+            brand = user_input[CONF_BRAND]
             data = {
                 **self.entry.data,
                 CONF_PASSWORD: password,
+                CONF_BRAND: brand,
             }
 
             try:
                 await validate_input(self.hass, data)
             except InvalidAuth:
                 errors["base"] = "invalid_auth"
-            except (CannotConnect, asyncio.TimeoutError):
+            except (CannotConnect, TimeoutError):
                 errors["base"] = "cannot_connect"
             else:
-                self.hass.config_entries.async_update_entry(
-                    self.entry,
-                    data={
-                        **self.entry.data,
-                        CONF_PASSWORD: password,
-                    },
-                )
+                self.hass.config_entries.async_update_entry(self.entry, data=data)
                 await self.hass.config_entries.async_reload(self.entry.entry_id)
                 return self.async_abort(reason="reauth_successful")
 

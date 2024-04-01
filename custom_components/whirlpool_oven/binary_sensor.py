@@ -1,4 +1,5 @@
 """Binary sensors for Whirlpool Appliances."""
+
 from __future__ import annotations
 
 from whirlpool.oven import Cavity
@@ -46,7 +47,7 @@ class WhirpoolOvenCavityDoorBinarySensor(WhirlpoolEntity, BinarySensorEntity):
 
     _attr_device_class = BinarySensorDeviceClass.DOOR
 
-    def __init__(self, device: WhirlpoolOvenDevice, cavity: Cavity):
+    def __init__(self, device: WhirlpoolOvenDevice, cavity: Cavity) -> None:
         """Initialize the cavity door binary sensor."""
         self.cavity = cavity
         super().__init__(device)

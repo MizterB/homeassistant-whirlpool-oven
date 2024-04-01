@@ -1,4 +1,5 @@
 """Base entity class for Whirlpool Appliances entities."""
+
 from __future__ import annotations
 
 from homeassistant.helpers.device_registry import DeviceInfo
@@ -15,10 +16,10 @@ class WhirlpoolEntity(Entity):
     _attr_should_poll = False
     _attr_force_update = False
 
-    def __init__(self, device: [WhirlpoolOvenDevice], **kwargs) -> None:
+    def __init__(self, device: list[WhirlpoolOvenDevice], **kwargs) -> None:
         """Initialize the Whirlpool entity."""
 
-        self.device: [WhirlpoolOvenDevice] = device
+        self.device: list[WhirlpoolOvenDevice] = device
 
         self._attr_unique_id = f"{self.device.appliance_data.said}-{self.name}"
 

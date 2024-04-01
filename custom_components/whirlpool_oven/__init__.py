@@ -1,10 +1,11 @@
 """The Whirlpool Appliances integration."""
+
 import asyncio
 
 from aiohttp import ClientError
 from whirlpool.appliancesmanager import AppliancesManager
 from whirlpool.auth import Auth
-from whirlpool.backendselector import BackendSelector, Brand, Region
+from whirlpool.backendselector import BackendSelector
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_PASSWORD, CONF_REGION, CONF_USERNAME, Platform
@@ -12,15 +13,10 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .const import CONF_OVEN, CONF_REGION_MAP, DOMAIN
+from .const import CONF_BRAND, CONF_BRANDS_MAP, CONF_OVEN, CONF_REGION_MAP, DOMAIN
 from .device import WhirlpoolOvenDevice, WhirpoolApplianceData
 
-PLATFORMS = [Platform.SENSOR, Platform.BINARY_SENSOR, Platform.LIGHT]
-
-
-def get_backend_selector_brand(region: Region) -> Brand:
-    """Get the BackendSelector brand for a region."""
-    return Brand.Maytag if region == Region.US else Brand.Whirlpool
+PLATFORMS = [Platform.BINARY_SENSOR, Platform.LIGHT, Platform.SENSOR]
 
 
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
@@ -31,7 +27,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     hass.data[DOMAIN][config_entry.entry_id] = {}
 
     region = CONF_REGION_MAP[config_entry.data.get(CONF_REGION, "EU")]
-    brand = get_backend_selector_brand(region)
+    brand = CONF_BRANDS_MAP[config_entry.data.get(CONF_BRAND, "Whirlpool")]
     backend_selector = BackendSelector(brand, region)
     auth = Auth(
         backend_selector,
@@ -42,7 +38,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
 
     try:
         await auth.do_auth(store=False)
-    except (ClientError, asyncio.TimeoutError) as err:
+    except (ClientError, TimeoutError) as err:
         raise ConfigEntryNotReady("Unable to connect to Whirlpool") from err
 
     if not auth.is_access_token_valid():

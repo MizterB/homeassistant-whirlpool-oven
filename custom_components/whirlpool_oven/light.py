@@ -1,4 +1,5 @@
 """Support for Whirlpool Appliances lights."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -45,7 +46,7 @@ class WhirpoolOvenCavityLight(WhirlpoolEntity, LightEntity):
 
     _attr_color_mode = ColorMode.ONOFF
 
-    def __init__(self, device: WhirlpoolOvenDevice, cavity: Cavity):
+    def __init__(self, device: WhirlpoolOvenDevice, cavity: Cavity) -> None:
         """Initialize the cavity door binary sensor."""
         self.cavity = cavity
         super().__init__(device)
