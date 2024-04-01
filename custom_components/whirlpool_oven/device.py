@@ -1,4 +1,5 @@
 """Device data for the Whirpool Appliances integration."""
+
 from __future__ import annotations
 
 from datetime import datetime, timedelta
@@ -103,7 +104,7 @@ class WhirlpoolOvenDevice(DataUpdateCoordinator):
 
     async def keep_alive(self, trigger: datetime) -> None:
         """Listen for oven events."""
-        LOGGER.debug(f"Keeping the API connection alive")
+        LOGGER.debug("Keeping the API connection alive")
         await self.oven.fetch_data()
 
     def register_callback(self, fn: callable):

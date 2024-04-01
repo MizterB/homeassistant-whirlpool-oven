@@ -7,6 +7,6 @@
   "integration_type": "hub",
   "iot_class": "cloud_push",
   "loggers": ["whirlpool_oven"],
-  "requirements": ["whirlpool-sixth-sense==0.18.5"],
-  "version": "0.1"
+  "requirements": ["whirlpool-sixth-sense==0.18.7"],
+  "version": "2024.4.0"
 }

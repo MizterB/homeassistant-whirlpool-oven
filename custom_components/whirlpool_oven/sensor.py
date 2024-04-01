@@ -1,4 +1,5 @@
 """Sensors for Whirlpool Appliances."""
+
 from __future__ import annotations
 
 from whirlpool.oven import Cavity
@@ -54,7 +55,7 @@ class WhirpoolOvenCavityStateSensor(WhirlpoolEntity, SensorEntity):
     _attr_device_class = SensorDeviceClass.ENUM
     _attr_options = list(OVEN_CAVITY_STATES.values())
 
-    def __init__(self, device, cavity: Cavity):
+    def __init__(self, device, cavity: Cavity) -> None:
         """Initialize the cavity state sensor."""
         self.cavity = cavity
         super().__init__(device)
@@ -77,7 +78,7 @@ class WhirpoolOvenCookModeSensor(WhirlpoolEntity, SensorEntity):
     _attr_device_class = SensorDeviceClass.ENUM
     _attr_options = list(OVEN_COOK_MODES.values())
 
-    def __init__(self, device, cavity: Cavity):
+    def __init__(self, device, cavity: Cavity) -> None:
         """Initialize the cook mode sensor."""
         self.cavity = cavity
         super().__init__(device)
@@ -101,7 +102,7 @@ class WhirpoolOvenTemperatureSensor(WhirlpoolEntity, SensorEntity):
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
 
-    def __init__(self, device, cavity: Cavity, temperature_type: str):
+    def __init__(self, device, cavity: Cavity, temperature_type: str) -> None:
         """Initialize the cook mode sensor."""
         self.cavity = cavity
         self.temperature_type = temperature_type
